@@ -5,5 +5,330 @@
 </head>
 <body>
     <h1>Hello World</h1>
+</body><!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ゴルフスコア管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            background: #5a67d8;
+        }
+        
+        .secondary-btn {
+            background: #48bb78;
+        }
+        
+        .secondary-btn:hover {
+            background: #38a169;
+        }
+        
+        .logout-btn {
+            background: #f56565;
+        }
+        
+        .logout-btn:hover {
+            background: #e53e3e;
+        }
+        
+        #message {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        #userInfo {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ユーザー情報表示 -->
+        <div id="userInfo" class="hidden">
+            <h3>ログイン中: <span id="userEmail"></span></h3>
+        </div>
+        
+        <!-- ログイン/登録フォーム -->
+        <div id="authSection" class="card">
+            <h1>🏌️ ゴルフスコア管理</h1>
+            
+            <div class="input-group">
+                <label for="email">メールアドレス</label>
+                <input type="email" id="email" placeholder="example@email.com">
+            </div>
+            
+            <div class="input-group">
+                <label for="password">パスワード</label>
+                <input type="password" id="password" placeholder="6文字以上">
+            </div>
+            
+            <button onclick="signUp()">新規登録</button>
+            <button class="secondary-btn" onclick="signIn()">ログイン</button>
+            
+            <div id="message"></div>
+        </div>
+        
+        <!-- ログイン後のメインコンテンツ -->
+        <div id="mainContent" class="hidden">
+            <div class="card">
+                <h2>スコア入力</h2>
+                <div class="input-group">
+                    <label for="date">日付</label>
+                    <input type="date" id="date">
+                </div>
+                
+                <div class="input-group">
+                    <label for="course">コース名</label>
+                    <input type="text" id="course" placeholder="〇〇ゴルフクラブ">
+                </div>
+                
+                <div class="input-group">
+                    <label for="score">スコア</label>
+                    <input type="number" id="score" placeholder="72">
+                </div>
+                
+                <button onclick="saveScore()">スコアを保存</button>
+                <button class="logout-btn" onclick="logOut()">ログアウト</button>
+            </div>
+            
+            <div class="card">
+                <h2>保存したスコア</h2>
+                <div id="scoreList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase設定 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        
+        // ここにあなたのFirebase設定を貼り付けてください
+        const firebaseConfig = {
+            apiKey: "AIzaSyCj5DqageKdTk23HVpv2ktSLHyOdlq2ksI",
+            authDomain: "golf-score-app56.firebaseapp.com",
+            projectId: "golf-score-app56",
+            storageBucket: "golf-score-app56.firebasestorage.app",
+            messagingSenderId: "984454469289",
+            appId: "1:984454469289:web:5cdedf6eb40d0a50befbb8"
+        };
+        
+        // メモアプリに保存したfirebaseConfigをここに貼り付け！
+        const firebaseConfig = {
+            // ここにコピーした設定を貼る
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // メッセージ表示関数
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = type;
+            setTimeout(() => {
+                messageDiv.textContent = '';
+                messageDiv.className = '';
+            }, 3000);
+        }
+        
+        // 新規登録
+        window.signUp = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showMessage('登録成功！', 'success');
+            } catch (error) {
+                showMessage('エラー: ' + error.message, 'error');
+            }
+        }
+        
+        // ログイン
+        window.signIn = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessage('ログイン成功！', 'success');
+            } catch (error) {
+                showMessage('エラー: ' + error.message, 'error');
+            }
+        }
+        
+        // ログアウト
+        window.logOut = async () => {
+            try {
+                await signOut(auth);
+                showMessage('ログアウトしました', 'success');
+            } catch (error) {
+                showMessage('エラー: ' + error.message, 'error');
+            }
+        }
+        
+        // スコア保存
+        window.saveScore = async () => {
+            const date = document.getElementById('date').value;
+            const course = document.getElementById('course').value;
+            const score = document.getElementById('score').value;
+            
+            if (!date || !course || !score) {
+                showMessage('すべての項目を入力してください', 'error');
+                return;
+            }
+            
+            try {
+                await addDoc(collection(db, 'scores'), {
+                    userId: auth.currentUser.uid,
+                    date: date,
+                    course: course,
+                    score: parseInt(score),
+                    createdAt: new Date()
+                });
+                
+                // フォームをクリア
+                document.getElementById('date').value = '';
+                document.getElementById('course').value = '';
+                document.getElementById('score').value = '';
+                
+                showMessage('スコアを保存しました！', 'success');
+            } catch (error) {
+                showMessage('エラー: ' + error.message, 'error');
+            }
+        }
+        
+        // ログイン状態の監視
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // ログイン済み
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                document.getElementById('userInfo').classList.remove('hidden');
+                document.getElementById('userEmail').textContent = user.email;
+                
+                // スコア一覧を取得
+                const q = query(
+                    collection(db, 'scores'),
+                    where('userId', '==', user.uid),
+                    orderBy('date', 'desc')
+                );
+                
+                onSnapshot(q, (snapshot) => {
+                    const scoreList = document.getElementById('scoreList');
+                    scoreList.innerHTML = '';
+                    
+                    if (snapshot.empty) {
+                        scoreList.innerHTML = '<p>まだスコアがありません</p>';
+                    } else {
+                        snapshot.forEach((doc) => {
+                            const data = doc.data();
+                            scoreList.innerHTML += `
+                                <div style="padding: 10px; border-bottom: 1px solid #eee;">
+                                    <strong>${data.date}</strong> - ${data.course}<br>
+                                    スコア: <strong>${data.score}</strong>
+                                </div>
+                            `;
+                        });
+                    }
+                });
+                
+            } else {
+                // ログアウト状態
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('mainContent').classList.add('hidden');
+                document.getElementById('userInfo').classList.add('hidden');
+            }
+        });
+        
+        // 今日の日付をデフォルトで設定
+        document.getElementById('date').valueAsDate = new Date();
+    </script>
 </body>
+</html>
 </html>
