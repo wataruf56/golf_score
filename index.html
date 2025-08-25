@@ -1,11 +1,4 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>テスト</title>
-</head>
-<body>
-    <h1>Hello World</h1>
-</body><!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -186,19 +179,14 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         
-        // ここにあなたのFirebase設定を貼り付けてください
+        // Firebase設定
         const firebaseConfig = {
-            apiKey: "AIzaSyCj5DqageKdTk23HVpv2ktSLHyOdlq2ksI",
+            apiKey: "AIzaSyCj5DqageKdTk23HVpv2ktSLHyOd1q2ksI",
             authDomain: "golf-score-app56.firebaseapp.com",
             projectId: "golf-score-app56",
             storageBucket: "golf-score-app56.firebasestorage.app",
             messagingSenderId: "984454469289",
             appId: "1:984454469289:web:5cdedf6eb40d0a50befbb8"
-        };
-        
-        // メモアプリに保存したfirebaseConfigをここに貼り付け！
-        const firebaseConfig = {
-            // ここにコピーした設定を貼る
         };
         
         const app = initializeApp(firebaseConfig);
@@ -330,5 +318,4 @@
         document.getElementById('date').valueAsDate = new Date();
     </script>
 </body>
-</html>
 </html>
