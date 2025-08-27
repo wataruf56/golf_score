@@ -1,97 +1,109 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ゴルフスコア管理</title>
-<style>
-  :root{
-    --bg1:#5c59d6; --bg2:#7b74f0;
-    --card:#fff; --text:#1f2937; --muted:#6b7280;
-    --primary:#4f46e5; --ok:#16a34a; --danger:#ef4444;
-  }
-  html,body{height:100%}
-  body{
-    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans JP',sans-serif;
-    background:
-      radial-gradient(1000px 700px at 10% -10%, var(--bg2), transparent 60%),
-      radial-gradient(1000px 700px at 120% 110%, var(--bg1), transparent 60%),
-      linear-gradient(180deg, #5a57d0, #7a72ef);
-    color:var(--text);
-  }
-  .wrap{max-width:420px;margin:20px auto;padding:0 14px}
-  .top{color:#fff;text-align:center;font-weight:800;font-size:18px;margin:16px 0}
-  .card{
-    background:var(--card); border-radius:16px; box-shadow:0 18px 40px rgba(0,0,0,.18);
-    padding:22px; margin:0 auto 18px;
-  }
-  h2{margin:0 0 10px; font-size:20px}
-  label{display:block;font-size:12px;color:var(--muted);margin:8px 0 6px}
-  input[type="email"],input[type="password"],input[type="text"],input[type="date"],input[type="number"]{
-    width:100%;box-sizing:border-box;padding:12px 14px;border:1px solid #e5e7eb;border-radius:10px;font-size:16px;background:#fff
-  }
-  input:focus{border-color:#a5b4fc; box-shadow:0 0 0 3px rgba(99,102,241,.18); outline:0}
-  .btn{width:100%;padding:12px 14px;border:none;border-radius:10px;font-weight:800;font-size:16px;cursor:pointer}
-  .btn-primary{background:var(--primary); color:#fff}
-  .btn-ok{background:var(--ok); color:#fff}
-  .btn-danger{background:#f87171; color:#fff}
-  .row{display:grid;grid-template-columns:1fr;gap:10px}
-  .center{text-align:center}
-  .link{color:#4f46e5;text-decoration:none}
-  .link:hover{text-decoration:underline}
-  .msg{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:14px}
-  .msg.ok{background:#ecfdf5;color:#065f46;border:1px solid #bbf7d0}
-  .msg.err{background:#fef2f2;color:#7f1d1d;border:1px solid #fecaca}
-  .scores{background:var(--card); border-radius:16px; box-shadow:0 18px 40px rgba(0,0,0,.18); padding:18px}
-  .item{display:flex;gap:10px;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eef2f7}
-  .item:last-child{border-bottom:none}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ゴルフスコア管理</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",'Noto Sans JP',Arial,sans-serif;
+      background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+      color:#333; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px
+    }
+    .container{width:100%;max-width:420px}
+    .card{
+      background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.15);
+      padding:24px;margin-bottom:16px
+    }
+    h1{font-size:24px;margin-bottom:12px;text-align:left}
+    .input-group{margin-bottom:12px}
+    label{display:block;margin-bottom:6px;color:#666;font-size:14px}
+    input{
+      width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:8px;font-size:16px;background:#fff
+    }
+    button{
+      width:100%;padding:12px;border:none;border-radius:8px;font-size:16px;font-weight:700;color:#fff;
+      background:#667eea;cursor:pointer;margin-bottom:10px
+    }
+    button:hover{background:#5a67d8}
+    .secondary-btn{background:#48bb78}
+    .danger-btn{background:#f87171}
+    .muted{color:#6b7280}
+    .center{text-align:center}
+    a.link{color:#4f46e5;text-decoration:none}
+    a.link:hover{text-decoration:underline}
+    .message{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:14px}
+    .success{background:#ecfdf5;color:#065f46;border:1px solid #bbf7d0}
+    .error{background:#fef2f2;color:#7f1d1d;border:1px solid #fecaca}
+    .hidden{display:none}
+    .score-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee}
+    .score-item:last-child{border-bottom:none}
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <div id="topbar" class="top"></div>
+  <div class="container">
+    <!-- ログイン中表示 -->
+    <div id="userInfo" class="hidden">
+      <h3>ログイン中: <span id="userEmail"></span></h3>
+    </div>
 
-    <!-- 認証 -->
-    <div id="authCard" class="card">
-      <h2>ゴルフスコア管理</h2>
-      <label for="email">メールアドレス</label>
-      <input id="email" type="email" placeholder="you@example.com" autocomplete="username"/>
-      <label for="password">パスワード</label>
-      <input id="password" type="password" placeholder="••••••••" autocomplete="current-password"/>
-      <div class="row" style="margin-top:12px">
-        <button id="btnSignUp" class="btn btn-primary">新規登録</button>
-        <button id="btnSignIn" class="btn btn-ok">ログイン</button>
+    <!-- 認証フォーム -->
+    <div id="authSection" class="card">
+      <h1>ゴルフスコア管理</h1>
+
+      <div class="input-group">
+        <label for="email">メールアドレス</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="username">
       </div>
-      <p class="center" style="margin-top:8px">
-        <a id="lnkReset" class="link" href="#">パスワードを忘れた？</a>
+
+      <div class="input-group">
+        <label for="password">パスワード</label>
+        <input type="password" id="password" placeholder="6文字以上" autocomplete="current-password">
+      </div>
+
+      <button onclick="signUp()">新規登録</button>
+      <button class="secondary-btn" onclick="signIn()">ログイン</button>
+
+      <p class="center" style="margin:6px 0 0">
+        <a href="javascript:void(0)" class="link" onclick="resetPassword()">パスワードを忘れた？</a>
       </p>
-      <div id="authMsg"></div>
+
+      <div id="message"></div>
     </div>
 
-    <!-- アプリ本体 -->
-    <div id="appCard" class="card" style="display:none">
-      <h2>スコア入力</h2>
-      <label for="date">日付</label>
-      <input id="date" type="date"/>
-      <label for="course">コース名</label>
-      <input id="course" type="text" placeholder="〇〇ゴルフクラブ"/>
-      <label for="score">スコア</label>
-      <input id="score" type="number" inputmode="numeric" placeholder="72"/>
-      <div class="row" style="margin-top:12px">
-        <button id="btnSave" class="btn btn-primary">スコアを保存</button>
-        <button id="btnSignOut" class="btn btn-danger">ログアウト</button>
+    <!-- メイン -->
+    <div id="mainContent" class="card hidden">
+      <h1>スコア入力</h1>
+
+      <div class="input-group">
+        <label for="date">日付</label>
+        <input type="date" id="date">
       </div>
-      <div id="appMsg"></div>
+
+      <div class="input-group">
+        <label for="course">コース名</label>
+        <input type="text" id="course" placeholder="〇〇ゴルフクラブ">
+      </div>
+
+      <div class="input-group">
+        <label for="score">スコア</label>
+        <input type="number" id="score" inputmode="numeric" placeholder="72">
+      </div>
+
+      <button onclick="saveScore()">スコアを保存</button>
+      <button class="danger-btn" onclick="logOut()">ログアウト</button>
+      <div id="appMessage"></div>
     </div>
 
-    <!-- 保存スコア -->
-    <div id="scoresWrap" class="scores" style="display:none">
-      <h2>保存したスコア</h2>
-      <div id="scoresList" class="center" style="color:#6b7280">まだスコアがありません</div>
+    <!-- 保存したスコア -->
+    <div id="scoreListCard" class="card hidden">
+      <h1>保存したスコア</h1>
+      <div id="scoreList" class="muted center">まだスコアがありません</div>
     </div>
   </div>
 
-  <!-- Firebase -->
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
     import {
@@ -99,10 +111,10 @@
       sendPasswordResetEmail, signOut, onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
     import {
-      getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp
+      getFirestore, collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-    // ===== あなたの firebaseConfig をここに差し替え =====
+    // ==== あなたの firebaseConfig を貼り付け ====
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -111,21 +123,25 @@
       messagingSenderId: "YOUR_SENDER_ID",
       appId: "YOUR_APP_ID"
     };
-    // ==================================================
+    // ===========================================
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    auth.languageCode = 'ja'; // 再設定メールを日本語寄りに
+    auth.languageCode = 'ja';
     const db = getFirestore(app);
 
-    const $ = (id)=>document.getElementById(id);
-    const show = (id, on)=>($(id).style.display = on ? "" : "none");
-    const msg = (where, text, ok=true)=>{
-      const el=$(where);
-      if(!text){ el.innerHTML=""; return; }
-      el.innerHTML = `<div class="msg ${ok?'ok':'err'}">${text}</div>`;
-    };
-    const niceErr = (e)=>{
+    // メッセージ表示（日本語）
+    function showMessage(text, kind){ // kind: 'success' | 'error'
+      const messageDiv = document.getElementById('message');
+      if(!text){ messageDiv.innerHTML=''; return;}
+      messageDiv.innerHTML = `<div class="message ${kind==='success'?'success':'error'}">${text}</div>`;
+    }
+    function showAppMessage(text, ok=true){
+      const el = document.getElementById('appMessage');
+      if(!text){ el.innerHTML=''; return;}
+      el.innerHTML = `<div class="message ${ok?'success':'error'}">${text}</div>`;
+    }
+    function nice(err){
       const m = {
         "auth/invalid-credential":"メールアドレスまたはパスワードが違います。",
         "auth/user-not-found":"このメールアドレスは登録がありません。",
@@ -133,88 +149,109 @@
         "auth/invalid-email":"メールアドレスの形式が正しくありません。",
         "auth/email-already-in-use":"このメールアドレスは既に登録されています。",
         "auth/weak-password":"パスワードは6文字以上にしてください。",
-        "auth/too-many-requests":"試行が多すぎます。時間をおいて再試行してください。"
+        "auth/too-many-requests":"試行が多すぎます。しばらく時間をおいて再試行してください。",
+        "auth/network-request-failed":"通信に失敗しました。ネットワーク状況をご確認ください。",
+        "auth/invalid-api-key":"APIキーが正しくありません（firebaseConfig を確認してください）。",
+        "auth/domain-not-allowed":"このドメインからの認証は許可されていません。（Authentication→設定→承認済みドメイン）"
       };
-      console.error(e); // デバッグ用
-      return m[e?.code] || "処理に失敗しました。入力内容をご確認ください。";
+      console.error(err); // デバッグ用
+      return m[err?.code] || "処理に失敗しました。入力内容をご確認ください。";
+    }
+
+    // 新規登録
+    window.signUp = async ()=>{
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      showMessage('');
+      try{
+        await createUserWithEmailAndPassword(auth, email, password);
+        showMessage('登録成功！', 'success');
+      }catch(e){ showMessage(nice(e), 'error'); }
     };
 
-    // DOM 準備後にイベント紐付け（onclick は使わない：確実に動く）
-    window.addEventListener('DOMContentLoaded', ()=>{
-      $('btnSignUp').addEventListener('click', onSignUp);
-      $('btnSignIn').addEventListener('click', onSignIn);
-      $('btnSignOut').addEventListener('click', onSignOut);
-      $('btnSave').addEventListener('click', onSave);
-      $('lnkReset').addEventListener('click', onReset);
-    });
+    // ログイン
+    window.signIn = async ()=>{
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      showMessage('');
+      try{
+        await signInWithEmailAndPassword(auth, email, password);
+        // 画面切替は onAuthStateChanged が担当
+      }catch(e){ showMessage(nice(e), 'error'); }
+    };
 
-    onAuthStateChanged(auth, async (user)=>{
+    // パスワード再設定
+    window.resetPassword = async ()=>{
+      const email = document.getElementById('email').value.trim();
+      if(!email){ showMessage('まずメールアドレスを入力してください。','error'); return; }
+      try{
+        await sendPasswordResetEmail(auth, email);
+        showMessage('パスワード再設定用のメールを送信しました。メールをご確認ください。','success');
+      }catch(e){ showMessage(nice(e), 'error'); }
+    };
+
+    // ログアウト
+    window.logOut = async ()=>{ await signOut(auth); };
+
+    // 認証状態の監視
+    onAuthStateChanged(auth, (user)=>{
       if(user){
-        $('topbar').textContent = `ログイン中: ${user.email ?? user.uid}`;
-        show('authCard', false); show('appCard', true); show('scoresWrap', true);
-        // 日付初期値
-        const t=new Date(), y=t.getFullYear(), m=String(t.getMonth()+1).padStart(2,'0'), d=String(t.getDate()).padStart(2,'0');
-        $('date').value = `${y}-${m}-${d}`;
-        await loadScores();
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+        document.getElementById('scoreListCard').classList.remove('hidden');
+        document.getElementById('userInfo').classList.remove('hidden');
+        document.getElementById('userEmail').textContent = user.email || user.uid;
+
+        // 今日に初期化
+        document.getElementById('date').valueAsDate = new Date();
+
+        // 自分のスコア一覧をライブ購読
+        const q = query(
+          collection(db, 'scores'),
+          where('userId','==', user.uid),
+          orderBy('date','desc')
+        );
+        onSnapshot(q, (snapshot)=>{
+          const list = document.getElementById('scoreList');
+          if(snapshot.empty){ list.className='muted center'; list.innerHTML='まだスコアがありません'; return; }
+          list.className='';
+          list.innerHTML = '';
+          snapshot.forEach(doc=>{
+            const d = doc.data();
+            const dd = new Date(d.date).toLocaleDateString('ja-JP');
+            list.innerHTML += `
+              <div class="score-item">
+                <div>${dd}</div>
+                <div>${d.course ?? '-'}</div>
+                <div><strong>${d.score}</strong></div>
+              </div>`;
+          });
+        });
       }else{
-        $('topbar').textContent = '';
-        show('authCard', true); show('appCard', false); show('scoresWrap', false);
-        msg('authMsg','');
+        document.getElementById('authSection').classList.remove('hidden');
+        document.getElementById('mainContent').classList.add('hidden');
+        document.getElementById('scoreListCard').classList.add('hidden');
+        document.getElementById('userInfo').classList.add('hidden');
       }
     });
 
-    async function onSignUp(){
-      msg('authMsg','');
-      try{
-        await createUserWithEmailAndPassword(auth, $('email').value.trim(), $('password').value);
-        msg('authMsg','アカウントを作成しました。', true);
-      }catch(e){ msg('authMsg', niceErr(e), false); }
-    }
-    async function onSignIn(){
-      msg('authMsg','');
-      try{
-        await signInWithEmailAndPassword(auth, $('email').value.trim(), $('password').value);
-        // 成功時は onAuthStateChanged が画面切替を行う
-      }catch(e){ msg('authMsg', niceErr(e), false); }
-    }
-    async function onReset(ev){
-      ev.preventDefault();
-      const email = $('email').value.trim();
-      if(!email){ msg('authMsg','まずメールアドレスを入力してください。', false); return; }
-      try{
-        await sendPasswordResetEmail(auth, email);
-        msg('authMsg','パスワード再設定用メールを送信しました。メールをご確認ください。', true);
-      }catch(e){ msg('authMsg', niceErr(e), false); }
-    }
-    async function onSignOut(){ await signOut(auth); }
-    async function onSave(){
+    // スコア保存
+    window.saveScore = async ()=>{
       const user = auth.currentUser; if(!user) return;
-      const date=$('date').value, course=$('course').value.trim(), score=Number($('score').value);
-      if(!date || !course || !score){ msg('appMsg','日付・コース名・スコアを入力してください。', false); return; }
+      const date = document.getElementById('date').value;
+      const course = document.getElementById('course').value.trim();
+      const score = Number(document.getElementById('score').value);
+      if(!date || !course || !score){ showAppMessage('日付・コース名・スコアを入力してください。', false); return; }
+
       try{
         await addDoc(collection(db,'scores'), {
-          uid:user.uid, email:user.email ?? null, date, course, score, createdAt: serverTimestamp()
+          userId:user.uid, email:user.email ?? null, date, course, score, createdAt: serverTimestamp()
         });
-        msg('appMsg','保存しました。', true);
-        $('course').value=''; $('score').value='';
-        await loadScores();
-      }catch(e){ msg('appMsg','保存に失敗しました（Firestore ルールをご確認ください）。', false); }
-    }
-    async function loadScores(){
-      const user=auth.currentUser; if(!user) return;
-      const q=query(collection(db,'scores'), where('uid','==',user.uid), orderBy('date','desc'));
-      const snap=await getDocs(q);
-      const list=$('scoresList');
-      if(snap.empty){ list.style.color='#6b7280'; list.textContent='まだスコアがありません'; return; }
-      const rows=[];
-      snap.forEach(doc=>{
-        const d=doc.data();
-        const dd=new Date(d.date).toLocaleDateString('ja-JP');
-        rows.push(`<div class="item"><div>${dd}</div><div>${d.course ?? '-'}</div><div><strong>${d.score}</strong></div></div>`);
-      });
-      list.style.color='inherit';
-      list.innerHTML = rows.join('');
-    }
+        showAppMessage('保存しました。', true);
+        document.getElementById('course').value='';
+        document.getElementById('score').value='';
+      }catch(e){ showAppMessage('保存に失敗しました。Firestore ルールをご確認ください。', false); }
+    };
   </script>
 </body>
 </html>
