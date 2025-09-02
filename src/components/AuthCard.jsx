@@ -1,159 +1,121 @@
+// src/components/AuthCard.jsx
 import React, { useState } from "react";
-import { auth } from "../firebase";
 import {
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   sendPasswordResetEmail,
 } from "firebase/auth";
+import { auth } from "../firebase";
 
-const nice = (e) => {
-  const map = {
-    "auth/invalid-credential": "メールアドレスまたはパスワードが違います。",
-    "auth/user-not-found": "このメールアドレスは登録がありません。",
-    "auth/wrong-password": "メールアドレスまたはパスワードが違います。",
-    "auth/invalid-email": "メールアドレスの形式が正しくありません。",
-    "auth/email-already-in-use": "このメールアドレスは既に登録されています。",
-    "auth/weak-password": "パスワードは6文字以上にしてください。",
-    "auth/too-many-requests": "試行が多すぎます。時間をおいて再試行してください。",
-    "auth/invalid-api-key": "APIキーが正しくありません（firebaseConfig を確認）。",
-    "auth/domain-not-allowed":
-      "このドメインからの認証は許可されていません（承認済みドメイン）。",
-  };
-  console.error(e);
-  return map[e?.code] || "処理に失敗しました。入力内容をご確認ください。";
+const errMsg = (code) => {
+  switch (code) {
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+      return "メールアドレスまたはパスワードが違います。";
+    case "auth/user-not-found":
+      return "ユーザーが見つかりません。新規登録してください。";
+    case "auth/invalid-email":
+      return "メールアドレスの形式が正しくありません。";
+    case "auth/too-many-requests":
+      return "リクエストが多すぎます。しばらくしてからお試しください。";
+    case "auth/network-request-failed":
+      return "ネットワークエラーが発生しました。";
+    case "auth/operation-not-allowed":
+      return "この認証方法は無効です（Firebase Console を確認）。";
+    default:
+      return "処理に失敗しました。入力内容をご確認ください。";
+  }
 };
 
 export default function AuthCard() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
-  const [msg, setMsg] = useState("");
-  const [ok, setOk] = useState(true);
-  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
-  const clearMsg = () => {
-    setMsg("");
-    setOk(true);
-  };
-
-  const signUp = async () => {
-    clearMsg();
-    setBusy(true);
+  const onSignUp = async () => {
+    setError("");
     try {
-      await createUserWithEmailAndPassword(auth, email.trim(), pw);
-      setOk(true);
-      setMsg("アカウントを作成しました。");
+      await createUserWithEmailAndPassword(auth, email, pw);
     } catch (e) {
-      setOk(false);
-      setMsg(nice(e));
-    } finally {
-      setBusy(false);
+      console.error(e);
+      setError(errMsg(e.code));
     }
   };
 
-  const signIn = async () => {
-    clearMsg();
-    setBusy(true);
+  const onLogin = async () => {
+    setError("");
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), pw);
-      // 成功時の画面切替は App.jsx 側の onAuthStateChanged が行う
+      await signInWithEmailAndPassword(auth, email, pw);
     } catch (e) {
-      setOk(false);
-      setMsg(nice(e));
-    } finally {
-      setBusy(false);
+      console.error(e);
+      setError(errMsg(e.code));
     }
   };
 
-  const reset = async () => {
-    if (!email.trim()) {
-      setOk(false);
-      setMsg("まずメールアドレスを入力してください。");
-      return;
-    }
-    clearMsg();
-    setBusy(true);
+  const onReset = async () => {
+    setError("");
     try {
-      await sendPasswordResetEmail(auth, email.trim());
-      setOk(true);
-      setMsg("パスワード再設定メールを送信しました。メールをご確認ください。");
+      if (!email) {
+        setError("パスワード再設定用のメールアドレスを入力してください。");
+        return;
+      }
+      await sendPasswordResetEmail(auth, email);
+      alert("パスワード再設定メールを送信しました。");
     } catch (e) {
-      setOk(false);
-      setMsg(nice(e));
-    } finally {
-      setBusy(false);
+      console.error(e);
+      setError(errMsg(e.code));
     }
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{
-        background:
-          "radial-gradient(1000px 700px at 10% -10%, #7b74f0, transparent 60%)," +
-          "radial-gradient(1000px 700px at 120% 110%, #5c59d6, transparent 60%)," +
-          "linear-gradient(180deg,#5a57d0,#7a72ef)",
-      }}
-    >
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6">
-        <h1 className="text-2xl font-bold mb-4">ゴルフスコア管理</h1>
+    <div className="max-w-md mx-auto mt-16 bg-white/95 rounded-xl shadow-xl p-6">
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">ゴルフスコア管理</h1>
 
-        <label className="block text-sm text-gray-600 mb-1">メールアドレス</label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 border rounded-lg focus:outline-none"
-          placeholder="you@example.com"
-          autoComplete="username"
-        />
+      <label className="block text-sm text-gray-600 mb-1">メールアドレス</label>
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="w-full border rounded-lg px-3 py-2 mb-4"
+        placeholder="you@example.com"
+      />
 
-        <label className="block text-sm text-gray-600 mb-1 mt-3">パスワード</label>
-        <input
-          type="password"
-          value={pw}
-          onChange={(e) => setPw(e.target.value)}
-          className="w-full p-3 border rounded-lg focus:outline-none"
-          placeholder="6文字以上"
-          autoComplete="current-password"
-        />
+      <label className="block text-sm text-gray-600 mb-1">パスワード</label>
+      <input
+        type="password"
+        value={pw}
+        onChange={(e) => setPw(e.target.value)}
+        className="w-full border rounded-lg px-3 py-2 mb-4"
+        placeholder="6文字以上"
+      />
 
-        <div className="grid grid-cols-2 gap-2 mt-4">
-          <button
-            onClick={signUp}
-            disabled={busy}
-            className="py-3 rounded-lg font-bold text-white"
-            style={{ background: "#4f46e5" }}
-          >
-            新規登録
-          </button>
-          <button
-            onClick={signIn}
-            disabled={busy}
-            className="py-3 rounded-lg font-bold text-white"
-            style={{ background: "#22c55e" }}
-          >
-            ログイン
-          </button>
-        </div>
-
-        <p className="text-center mt-2">
-          <button onClick={reset} className="text-indigo-600 underline text-sm">
-            パスワードを忘れた？
-          </button>
-        </p>
-
-        {msg && (
-          <div
-            className={`mt-3 p-3 rounded-lg text-sm ${
-              ok
-                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                : "bg-rose-50 text-rose-700 border border-rose-200"
-            }`}
-          >
-            {msg}
-          </div>
-        )}
+      <div className="flex gap-3">
+        <button
+          onClick={onSignUp}
+          className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg"
+        >
+          新規登録
+        </button>
+        <button
+          onClick={onLogin}
+          className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg"
+        >
+          ログイン
+        </button>
       </div>
+
+      <button
+        onClick={onReset}
+        className="mt-3 text-sm text-indigo-600 hover:underline"
+      >
+        パスワードを忘れた？
+      </button>
+
+      {error && (
+        <div className="mt-4 bg-red-50 text-red-700 border border-red-200 rounded-lg p-3">
+          {error}
+        </div>
+      )}
     </div>
   );
 }
