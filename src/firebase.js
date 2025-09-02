@@ -4,7 +4,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-      apiKey: "AIzaSyCj5DqageKdTk23HVpv2ktSLHyOd1q2ksI",
+      apiKey: "AIzaSyCj5DqageKdTk23HVpv2ktSLHyOdlq2ksI",
       authDomain: "golf-score-app56.firebaseapp.com",
       projectId: "golf-score-app56",
       storageBucket: "golf-score-app56.firebasestorage.app",
