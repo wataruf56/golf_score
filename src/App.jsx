@@ -1,18 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth, db } from "./firebase";
-import AuthCard from "./components/AuthCard.jsx";
-import GolfScoreMemoApp from "./components/GolfScoreMemoApp.jsx";
+// src/App.jsx
+import React from "react";
+import AuthCard from "./components/AuthCard";
 
 export default function App() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
-    return () => unsub();
-  }, []);
-
-  if (!user) return <AuthCard />;
-
-  return <GolfScoreMemoApp user={user} db={db} onLogout={() => signOut(auth)} />;
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-violet-500 p-4">
+      <AuthCard />
+    </div>
+  );
 }
